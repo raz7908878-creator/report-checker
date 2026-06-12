@@ -371,10 +371,33 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text("Operation cancelled.")
     return ConversationHandler.END
 
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
+
+class DummyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"bot is running !!!")
+        
+    def log_message(self, format, *args):
+        # Suppress standard HTTP logs so terminal stays clean
+        pass
+
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), DummyHandler)
+    server.serve_forever()
+
 def main() -> None:
     if not BOT_TOKEN:
         print("Please set BOT_TOKEN in .env")
         return
+
+    # Start the dummy web server in a background thread to satisfy Render's port binding
+    threading.Thread(target=run_dummy_server, daemon=True).start()
+    print("Dummy web server started to keep Render happy!")
 
     application = Application.builder().token(BOT_TOKEN).build()
 
