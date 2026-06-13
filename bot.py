@@ -418,7 +418,8 @@ def main() -> None:
     user_conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("check", check_start),
-            CommandHandler("start", check_start)
+            CommandHandler("start", check_start),
+            MessageHandler(filters.Document.ALL, user_file_received)
         ],
         states={
             WAITING_FOR_USER_FILE: [MessageHandler(filters.Document.ALL, user_file_received)],
